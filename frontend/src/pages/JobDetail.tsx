@@ -21,6 +21,16 @@ import {
 
 import StatusBadge from "../components/StatusBadge";
 
+function getErrorMessage(
+  error: unknown,
+): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "An unknown error occurred.";
+}
+
 
 function defaultCaption(
   title: string,
@@ -64,9 +74,9 @@ export default function JobDetail() {
         status === "completed"
         || status === "failed"
         || status
-          === "cancelled"
+        === "cancelled"
         || status
-          === "awaiting_approval"
+        === "awaiting_approval"
       ) {
         return false;
       }
@@ -499,12 +509,9 @@ export default function JobDetail() {
 
             {approve.isError && (
               <div className="error">
-                {
-                  (
-                    approve.error
-                    as Error
-                  ).message
-                }
+                {getErrorMessage(
+                  approve.error,
+                )}
               </div>
             )}
 
@@ -553,295 +560,287 @@ export default function JobDetail() {
 
             {!account.data
               ?.connected ? (
-                <p>
-                  Connect TikTok before
-                  publishing.{" "}
+              <p>
+                Connect TikTok before
+                publishing.{" "}
 
-                  <Link to="/tiktok">
-                    Open TikTok settings
-                  </Link>
-                </p>
-              ) : (
-                <>
-                  {creatorInfo.isError && (
-                    <div className="error">
-                      {
-                        (
-                          creatorInfo.error
-                          as Error
-                        ).message
-                      }
-                    </div>
-                  )}
+                <Link to="/tiktok">
+                  Open TikTok settings
+                </Link>
+              </p>
+            ) : (
+              <>
+                {creatorInfo.isError && (
 
-                  <div className="field">
-                    <label htmlFor="tiktok-caption">
-                      Caption and hashtags
-                    </label>
-
-                    <textarea
-                      id="tiktok-caption"
-                      rows={6}
-                      maxLength={2200}
-                      value={caption}
-                      onChange={event =>
-                        setCaption(
-                          event.target.value,
-                        )
-                      }
-                    />
-
-                    <small>
-                      {caption.length}
-                      /2200
-                    </small>
-                  </div>
-
-                  <div className="field">
-                    <label htmlFor="privacy-level">
-                      Privacy
-                    </label>
-
-                    <select
-                      id="privacy-level"
-                      value={privacyLevel}
-                      onChange={event =>
-                        setPrivacyLevel(
-                          event.target.value,
-                        )
-                      }
-                    >
-                      {privacyOptions.map(
-                        option => (
-                          <option
-                            key={option}
-                            value={option}
-                          >
-                            {option}
-                          </option>
-                        ),
-                      )}
-                    </select>
-                  </div>
-
-                  <div className="field">
-                    <label htmlFor="cover-time">
-                      Cover frame time
-                      in milliseconds
-                    </label>
-
-                    <input
-                      id="cover-time"
-                      type="number"
-                      min={0}
-                      value={coverTimestamp}
-                      onChange={event =>
-                        setCoverTimestamp(
-                          Number(
-                            event.target.value,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-
-                  <label className="checkbox">
-                    <input
-                      type="checkbox"
-                      checked={
-                        disableComment
-                      }
-                      onChange={event =>
-                        setDisableComment(
-                          event.target.checked,
-                        )
-                      }
-                      disabled={
-                        creatorInfo.data
-                          ?.comment_disabled
-                      }
-                    />
-
-                    Disable comments
-                  </label>
-
-                  <label className="checkbox">
-                    <input
-                      type="checkbox"
-                      checked={
-                        disableDuet
-                      }
-                      onChange={event =>
-                        setDisableDuet(
-                          event.target.checked,
-                        )
-                      }
-                      disabled={
-                        creatorInfo.data
-                          ?.duet_disabled
-                      }
-                    />
-
-                    Disable Duet
-                  </label>
-
-                  <label className="checkbox">
-                    <input
-                      type="checkbox"
-                      checked={
-                        disableStitch
-                      }
-                      onChange={event =>
-                        setDisableStitch(
-                          event.target.checked,
-                        )
-                      }
-                      disabled={
-                        creatorInfo.data
-                          ?.stitch_disabled
-                      }
-                    />
-
-                    Disable Stitch
-                  </label>
-
-                  <label className="checkbox">
-                    <input
-                      type="checkbox"
-                      checked={isAigc}
-                      onChange={event =>
-                        setIsAigc(
-                          event.target.checked,
-                        )
-                      }
-                    />
-
-                    Label as AI-generated
-                    content
-                  </label>
-
-                  <label className="checkbox">
-                    <input
-                      type="checkbox"
-                      checked={ownBusiness}
-                      onChange={event =>
-                        setOwnBusiness(
-                          event.target.checked,
-                        )
-                      }
-                    />
-
-                    Promotes my own
-                    business
-                  </label>
-
-                  <label className="checkbox">
-                    <input
-                      type="checkbox"
-                      checked={
-                        paidPartnership
-                      }
-                      onChange={event =>
-                        setPaidPartnership(
-                          event.target.checked,
-                        )
-                      }
-                    />
-
-                    Paid partnership
-                  </label>
-
-                  <p>
-                    By clicking publish,
-                    you explicitly
-                    authorize Reddit
-                    Studio to upload this
-                    MP4 and selected
-                    metadata to TikTok.
-                  </p>
-
-                  {job.tiktok_status && (
-                    <p>
-                      TikTok status:{" "}
-                      <strong>
-                        {
-                          job.tiktok_status
-                        }
-                      </strong>
-                    </p>
-                  )}
-
-                  {job.tiktok_last_error && (
-                    <div className="error">
-                      {
-                        job.tiktok_last_error
-                      }
-                    </div>
-                  )}
-
-                  {publish.isError && (
-                    <div className="error">
-                      {
-                        (
-                          publish.error
-                          as Error
-                        ).message
-                      }
-                    </div>
-                  )}
-
-                  {refreshStatus.isError && (
-                    <div className="error">
-                      {
-                        (
-                          refreshStatus.error
-                          as Error
-                        ).message
-                      }
-                    </div>
-                  )}
-
-                  <div className="actions">
-                    <button
-                      className="button primary"
-                      type="button"
-                      disabled={
-                        publish.isPending
-                        || !caption.trim()
-                        || !privacyLevel
-                      }
-                      onClick={() =>
-                        publish.mutate()
-                      }
-                    >
-                      {
-                        publish.isPending
-                          ? "Uploading to TikTok…"
-                          : "Publish to TikTok"
-                      }
-                    </button>
-
-                    {job.tiktok_publish_id && (
-                      <button
-                        className="button"
-                        type="button"
-                        disabled={
-                          refreshStatus.isPending
-                        }
-                        onClick={() =>
-                          refreshStatus.mutate()
-                        }
-                      >
-                        {
-                          refreshStatus.isPending
-                            ? "Checking…"
-                            : "Refresh TikTok status"
-                        }
-                      </button>
+                  <div className="error">
+                    {getErrorMessage(
+                      creatorInfo.error,
                     )}
                   </div>
-                </>
-              )}
+                )}
+
+                <div className="field">
+                  <label htmlFor="tiktok-caption">
+                    Caption and hashtags
+                  </label>
+
+                  <textarea
+                    id="tiktok-caption"
+                    rows={6}
+                    maxLength={2200}
+                    value={caption}
+                    onChange={event =>
+                      setCaption(
+                        event.target.value,
+                      )
+                    }
+                  />
+
+                  <small>
+                    {caption.length}
+                    /2200
+                  </small>
+                </div>
+
+                <div className="field">
+                  <label htmlFor="privacy-level">
+                    Privacy
+                  </label>
+
+                  <select
+                    id="privacy-level"
+                    value={privacyLevel}
+                    onChange={event =>
+                      setPrivacyLevel(
+                        event.target.value,
+                      )
+                    }
+                  >
+                    {privacyOptions.map(
+                      option => (
+                        <option
+                          key={option}
+                          value={option}
+                        >
+                          {option}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </div>
+
+                <div className="field">
+                  <label htmlFor="cover-time">
+                    Cover frame time
+                    in milliseconds
+                  </label>
+
+                  <input
+                    id="cover-time"
+                    type="number"
+                    min={0}
+                    value={coverTimestamp}
+                    onChange={event =>
+                      setCoverTimestamp(
+                        Number(
+                          event.target.value,
+                        ),
+                      )
+                    }
+                  />
+                </div>
+
+                <label className="checkbox">
+                  <input
+                    type="checkbox"
+                    checked={
+                      disableComment
+                    }
+                    onChange={event =>
+                      setDisableComment(
+                        event.target.checked,
+                      )
+                    }
+                    disabled={
+                      creatorInfo.data
+                        ?.comment_disabled
+                    }
+                  />
+
+                  Disable comments
+                </label>
+
+                <label className="checkbox">
+                  <input
+                    type="checkbox"
+                    checked={
+                      disableDuet
+                    }
+                    onChange={event =>
+                      setDisableDuet(
+                        event.target.checked,
+                      )
+                    }
+                    disabled={
+                      creatorInfo.data
+                        ?.duet_disabled
+                    }
+                  />
+
+                  Disable Duet
+                </label>
+
+                <label className="checkbox">
+                  <input
+                    type="checkbox"
+                    checked={
+                      disableStitch
+                    }
+                    onChange={event =>
+                      setDisableStitch(
+                        event.target.checked,
+                      )
+                    }
+                    disabled={
+                      creatorInfo.data
+                        ?.stitch_disabled
+                    }
+                  />
+
+                  Disable Stitch
+                </label>
+
+                <label className="checkbox">
+                  <input
+                    type="checkbox"
+                    checked={isAigc}
+                    onChange={event =>
+                      setIsAigc(
+                        event.target.checked,
+                      )
+                    }
+                  />
+
+                  Label as AI-generated
+                  content
+                </label>
+
+                <label className="checkbox">
+                  <input
+                    type="checkbox"
+                    checked={ownBusiness}
+                    onChange={event =>
+                      setOwnBusiness(
+                        event.target.checked,
+                      )
+                    }
+                  />
+
+                  Promotes my own
+                  business
+                </label>
+
+                <label className="checkbox">
+                  <input
+                    type="checkbox"
+                    checked={
+                      paidPartnership
+                    }
+                    onChange={event =>
+                      setPaidPartnership(
+                        event.target.checked,
+                      )
+                    }
+                  />
+
+                  Paid partnership
+                </label>
+
+                <p>
+                  By clicking publish,
+                  you explicitly
+                  authorize Reddit
+                  Studio to upload this
+                  MP4 and selected
+                  metadata to TikTok.
+                </p>
+
+                {job.tiktok_status && (
+                  <p>
+                    TikTok status:{" "}
+                    <strong>
+                      {
+                        job.tiktok_status
+                      }
+                    </strong>
+                  </p>
+                )}
+
+                {job.tiktok_last_error && (
+                  <div className="error">
+                    {
+                      job.tiktok_last_error
+                    }
+                  </div>
+                )}
+
+                {publish.isError && (
+                  <div className="error">
+                    {getErrorMessage(
+                      publish.error,
+                    )}
+                  </div>
+                )}
+
+                {refreshStatus.isError && (
+                  <div className="error">
+                    {getErrorMessage(
+                      refreshStatus.error,
+                    )}
+                  </div>
+                )}
+
+                <div className="actions">
+                  <button
+                    className="button primary"
+                    type="button"
+                    disabled={
+                      publish.isPending
+                      || !caption.trim()
+                      || !privacyLevel
+                    }
+                    onClick={() =>
+                      publish.mutate()
+                    }
+                  >
+                    {
+                      publish.isPending
+                        ? "Uploading to TikTok…"
+                        : "Publish to TikTok"
+                    }
+                  </button>
+
+                  {job.tiktok_publish_id && (
+                    <button
+                      className="button"
+                      type="button"
+                      disabled={
+                        refreshStatus.isPending
+                      }
+                      onClick={() =>
+                        refreshStatus.mutate()
+                      }
+                    >
+                      {
+                        refreshStatus.isPending
+                          ? "Checking…"
+                          : "Refresh TikTok status"
+                      }
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
           </section>
         )}
 
@@ -866,7 +865,7 @@ export default function JobDetail() {
             job.status,
           )
             && job.status
-              !== "awaiting_approval"
+            !== "awaiting_approval"
             && (
               <button
                 className="button danger"
@@ -936,7 +935,7 @@ export default function JobDetail() {
                 )
               }
               placeholder=
-                "https://www.tiktok.com/..."
+              "https://www.tiktok.com/..."
             />
           </div>
 

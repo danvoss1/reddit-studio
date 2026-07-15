@@ -4,7 +4,7 @@ import {
 } from "react";
 
 
-const LOCAL_CALLBACK =
+const LOCAL_BACKEND_CALLBACK =
   "http://127.0.0.1:8000/api/tiktok/callback";
 
 
@@ -15,25 +15,34 @@ export default function TikTokCallback() {
   ] = useState("");
 
   useEffect(() => {
+    const queryString =
+      window.location.search;
+
     const params =
       new URLSearchParams(
-        window.location.search,
+        queryString,
       );
 
-    const hasOAuthResult =
-      params.has("code")
-      || params.has("error");
+    const hasAuthorizationCode =
+      params.has("code");
 
-    if (!hasOAuthResult) {
+    const hasOAuthError =
+      params.has("error");
+
+    if (
+      !hasAuthorizationCode
+      && !hasOAuthError
+    ) {
       setError(
-        "TikTok did not return an authorization result.",
+        "No TikTok authorization result was supplied. "
+        + "This page is only used after authorizing Reddit Studio on TikTok.",
       );
 
       return;
     }
 
     window.location.replace(
-      `${LOCAL_CALLBACK}?${params.toString()}`,
+      `${LOCAL_BACKEND_CALLBACK}${queryString}`,
     );
   }, []);
 
@@ -53,10 +62,12 @@ export default function TikTokCallback() {
         </div>
       ) : (
         <p>
-          Returning to the local
-          Reddit Studio backend.
-          Keep Reddit Studio running
-          on this computer.
+          TikTok authorization was
+          received. Returning to the
+          local Reddit Studio backend.
+          Keep Reddit Studio and the
+          FastAPI backend running on
+          this computer.
         </p>
       )}
     </section>

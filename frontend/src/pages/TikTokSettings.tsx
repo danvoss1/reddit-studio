@@ -17,8 +17,23 @@ import {
 } from "../api";
 
 
+function getErrorMessage(
+  error: unknown,
+): string {
+  if (
+    error instanceof Error
+  ) {
+    return error.message;
+  }
+
+  return (
+    "An unknown error occurred."
+  );
+}
+
+
 export default function TikTokSettings() {
-  const client =
+  const queryClient =
     useQueryClient();
 
   const [
@@ -26,36 +41,40 @@ export default function TikTokSettings() {
     setSearchParams,
   ] = useSearchParams();
 
-  const account = useQuery({
-    queryKey: [
-      "tiktok-account",
-    ],
-    queryFn:
-      api.tiktokAccount,
-  });
+  const accountQuery =
+    useQuery({
+      queryKey: [
+        "tiktok-account",
+      ],
 
-  const connect = useMutation({
-    mutationFn:
-      api.connectTikTok,
+      queryFn:
+        api.tiktokAccount,
+    });
 
-    onSuccess: data => {
-      window.location.assign(
-        data.authorization_url,
-      );
-    },
-  });
+  const connectMutation =
+    useMutation({
+      mutationFn:
+        api.connectTikTok,
 
-  const disconnect =
+      onSuccess: data => {
+        window.location.assign(
+          data.authorization_url,
+        );
+      },
+    });
+
+  const disconnectMutation =
     useMutation({
       mutationFn:
         api.disconnectTikTok,
 
-      onSuccess: () => {
-        client.invalidateQueries({
-          queryKey: [
-            "tiktok-account",
-          ],
-        });
+      onSuccess: async () => {
+        await queryClient
+          .invalidateQueries({
+            queryKey: [
+              "tiktok-account",
+            ],
+          });
       },
     });
 
@@ -63,18 +82,21 @@ export default function TikTokSettings() {
     if (
       searchParams.get(
         "connected",
-      ) === "1"
+      ) !== "1"
     ) {
-      client.invalidateQueries({
+      return;
+    }
+
+    void queryClient
+      .invalidateQueries({
         queryKey: [
           "tiktok-account",
         ],
       });
 
-      setSearchParams({});
-    }
+    setSearchParams({});
   }, [
-    client,
+    queryClient,
     searchParams,
     setSearchParams,
   ]);
@@ -105,126 +127,155 @@ export default function TikTokSettings() {
           </div>
         )}
 
-        {account.isLoading && (
+        {accountQuery.isLoading && (
           <p>
             Checking TikTok
             connection…
           </p>
         )}
 
-        {account.isError && (
+        {accountQuery.isError && (
           <div className="error">
-            {
-              (
-                account.error
-                as Error
-              ).message
-            }
+            {getErrorMessage(
+              accountQuery.error,
+            )}
           </div>
         )}
 
-        {account.data?.connected ? (
-          <>
-            <div className="meta">
-              {account.data
-                .avatar_url && (
-                <img
-                  src={
-                    account.data
-                      .avatar_url
-                  }
-                  alt=""
-                  width={64}
-                  height={64}
-                  style={{
-                    borderRadius:
-                      "50%",
-                  }}
-                />
-              )}
+        {accountQuery.data
+          ?.connected ? (
+            <>
+              <div className="meta">
+                {accountQuery.data
+                  .avatar_url && (
+                    <img
+                      src={
+                        accountQuery
+                          .data
+                          .avatar_url
+                      }
+                      alt={
+                        "Connected TikTok account"
+                      }
+                      width={64}
+                      height={64}
+                      style={{
+                        borderRadius:
+                          "50%",
 
-              <div>
-                <strong>
-                  {
-                    account.data
-                      .display_name
-                    ?? "Connected TikTok account"
-                  }
-                </strong>
+                        objectFit:
+                          "cover",
+                      }}
+                    />
+                  )}
 
-                <p>
-                  TikTok is connected
-                  and ready for
-                  uploads.
-                </p>
+                <div>
+                  <strong>
+                    {
+                      accountQuery
+                        .data
+                        .display_name
+                      ?? "Connected TikTok account"
+                    }
+                  </strong>
+
+                  <p>
+                    TikTok is connected
+                    and ready for
+                    uploads.
+                  </p>
+
+                  {accountQuery.data
+                    .scope && (
+                      <small>
+                        Authorized
+                        scopes:{" "}
+                        {
+                          accountQuery
+                            .data
+                            .scope
+                        }
+                      </small>
+                    )}
+                </div>
               </div>
+
+              <div className="actions">
+                <button
+                  className={
+                    "button danger"
+                  }
+                  type="button"
+                  disabled={
+                    disconnectMutation
+                      .isPending
+                  }
+                  onClick={() =>
+                    disconnectMutation
+                      .mutate()
+                  }
+                >
+                  {
+                    disconnectMutation
+                      .isPending
+                      ? "Disconnecting…"
+                      : "Disconnect TikTok"
+                  }
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p>
+                Connect the TikTok
+                account that should
+                receive your rendered
+                videos.
+              </p>
+
+              <div className="actions">
+                <button
+                  className={
+                    "button primary"
+                  }
+                  type="button"
+                  disabled={
+                    connectMutation
+                      .isPending
+                  }
+                  onClick={() =>
+                    connectMutation
+                      .mutate()
+                  }
+                >
+                  {
+                    connectMutation
+                      .isPending
+                      ? "Opening TikTok…"
+                      : "Connect TikTok"
+                  }
+                </button>
+              </div>
+            </>
+          )}
+
+        {connectMutation.isError && (
+          <div className="error">
+            {getErrorMessage(
+              connectMutation.error,
+            )}
+          </div>
+        )}
+
+        {disconnectMutation
+          .isError && (
+            <div className="error">
+              {getErrorMessage(
+                disconnectMutation
+                  .error,
+              )}
             </div>
-
-            <button
-              className="button danger"
-              type="button"
-              disabled={
-                disconnect.isPending
-              }
-              onClick={() =>
-                disconnect.mutate()
-              }
-            >
-              {
-                disconnect.isPending
-                  ? "Disconnecting…"
-                  : "Disconnect TikTok"
-              }
-            </button>
-          </>
-        ) : (
-          <>
-            <p>
-              Connect the TikTok account
-              that should receive the
-              rendered videos.
-            </p>
-
-            <button
-              className="button primary"
-              type="button"
-              disabled={
-                connect.isPending
-              }
-              onClick={() =>
-                connect.mutate()
-              }
-            >
-              {
-                connect.isPending
-                  ? "Opening TikTok…"
-                  : "Connect TikTok"
-              }
-            </button>
-          </>
-        )}
-
-        {connect.isError && (
-          <div className="error">
-            {
-              (
-                connect.error
-                as Error
-              ).message
-            }
-          </div>
-        )}
-
-        {disconnect.isError && (
-          <div className="error">
-            {
-              (
-                disconnect.error
-                as Error
-              ).message
-            }
-          </div>
-        )}
+          )}
       </section>
     </>
   );
