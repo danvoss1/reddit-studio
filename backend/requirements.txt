@@ -4,5 +4,6 @@ sqlalchemy>=2.0
 pydantic-settings>=2.7
 python-multipart>=0.0.20
 requests>=2.32
+cryptography>=44.0
 openai>=1.60
 playwright>=1.50

@@ -1,61 +1,223 @@
-import type { Asset, Stats, VideoJob, Voice } from "./types";
+import type {
+  Asset,
+  Stats,
+  TikTokAccount,
+  TikTokCreatorInfo,
+  TikTokPostStatus,
+  TikTokPublishPayload,
+  TikTokPublishResult,
+  VideoJob,
+  Voice,
+} from "./types";
 
-async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(url, options);
+
+async function request<T>(
+  url: string,
+  options?: RequestInit,
+): Promise<T> {
+  const response = await fetch(
+    url,
+    options,
+  );
 
   if (!response.ok) {
     const body = await response
       .json()
-      .catch(() => ({ detail: response.statusText }));
-    throw new Error(body.detail ?? "Request failed");
+      .catch(() => ({
+        detail:
+          response.statusText,
+      }));
+
+    throw new Error(
+      body.detail
+      ?? "Request failed",
+    );
   }
 
-  if (response.status === 204) return undefined as T;
+  if (
+    response.status === 204
+  ) {
+    return undefined as T;
+  }
+
   return response.json();
 }
 
+
 export const api = {
-  jobs: () => request<VideoJob[]>("/api/jobs"),
-  job: (id: string) => request<VideoJob>(`/api/jobs/${id}`),
-  voices: () => request<Voice[]>("/api/voices"),
+  jobs: () =>
+    request<VideoJob[]>(
+      "/api/jobs",
+    ),
 
-  createJob: (payload: unknown) =>
-    request<VideoJob>("/api/jobs", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }),
+  job: (id: string) =>
+    request<VideoJob>(
+      `/api/jobs/${id}`,
+    ),
 
-  approve: (id: string, script: string) =>
-    request<VideoJob>(`/api/jobs/${id}/approve`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ script }),
-    }),
+  voices: () =>
+    request<Voice[]>(
+      "/api/voices",
+    ),
 
-  cancel: (id: string) =>
-    request<VideoJob>(`/api/jobs/${id}/cancel`, { method: "POST" }),
+  createJob: (
+    payload: unknown,
+  ) =>
+    request<VideoJob>(
+      "/api/jobs",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify(
+          payload,
+        ),
+      },
+    ),
 
-  updatePublication: (id: string, payload: unknown) =>
-    request<VideoJob>(`/api/jobs/${id}/publication`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }),
+  approve: (
+    id: string,
+    script: string,
+  ) =>
+    request<VideoJob>(
+      `/api/jobs/${id}/approve`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          script,
+        }),
+      },
+    ),
 
-  assets: () => request<Asset[]>("/api/assets"),
+  cancel: (
+    id: string,
+  ) =>
+    request<VideoJob>(
+      `/api/jobs/${id}/cancel`,
+      {
+        method: "POST",
+      },
+    ),
 
-  uploadAsset: (kind: string, file: File) => {
-    const form = new FormData();
-    form.append("file", file);
-    return request<Asset>(`/api/assets/${kind}`, {
-      method: "POST",
-      body: form,
-    });
+  updatePublication: (
+    id: string,
+    payload: unknown,
+  ) =>
+    request<VideoJob>(
+      `/api/jobs/${id}/publication`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify(
+          payload,
+        ),
+      },
+    ),
+
+  assets: () =>
+    request<Asset[]>(
+      "/api/assets",
+    ),
+
+  uploadAsset: (
+    kind: string,
+    file: File,
+  ) => {
+    const form =
+      new FormData();
+
+    form.append(
+      "file",
+      file,
+    );
+
+    return request<Asset>(
+      `/api/assets/${kind}`,
+      {
+        method: "POST",
+        body: form,
+      },
+    );
   },
 
-  deleteAsset: (id: string) =>
-    request<void>(`/api/assets/${id}`, { method: "DELETE" }),
+  deleteAsset: (
+    id: string,
+  ) =>
+    request<void>(
+      `/api/assets/${id}`,
+      {
+        method: "DELETE",
+      },
+    ),
 
-  stats: () => request<Stats>("/api/stats"),
+  stats: () =>
+    request<Stats>(
+      "/api/stats",
+    ),
+
+  tiktokAccount: () =>
+    request<TikTokAccount>(
+      "/api/tiktok/account",
+    ),
+
+  connectTikTok: () =>
+    request<{
+      authorization_url: string;
+    }>(
+      "/api/tiktok/connect",
+      {
+        method: "POST",
+      },
+    ),
+
+  disconnectTikTok: () =>
+    request<void>(
+      "/api/tiktok/account",
+      {
+        method: "DELETE",
+      },
+    ),
+
+  tiktokCreatorInfo: () =>
+    request<TikTokCreatorInfo>(
+      "/api/tiktok/creator-info",
+    ),
+
+  publishToTikTok: (
+    id: string,
+    payload:
+      TikTokPublishPayload,
+  ) =>
+    request<TikTokPublishResult>(
+      `/api/jobs/${id}/tiktok/publish`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify(
+          payload,
+        ),
+      },
+    ),
+
+  refreshTikTokStatus: (
+    id: string,
+  ) =>
+    request<TikTokPostStatus>(
+      `/api/jobs/${id}/tiktok/status`,
+      {
+        method: "POST",
+      },
+    ),
 };
