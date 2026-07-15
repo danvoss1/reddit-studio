@@ -5,6 +5,7 @@ import NewVideo from "./pages/NewVideo";
 import JobDetail from "./pages/JobDetail";
 import History from "./pages/History";
 import Assets from "./pages/Assets";
+import Privacy from "./pages/Privacy";
 
 const navigation = [
   ["/", "Dashboard", Gauge],
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/history" element={<History />} />
           <Route path="/assets" element={<Assets />} />
+          <Route path="/privacy" element={<Privacy />} />
         </Routes>
       </main>
     </div>
