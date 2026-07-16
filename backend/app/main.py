@@ -89,9 +89,16 @@ async def require_local_app_key(
     request: Request,
     call_next,
 ):
+    is_video_download = (
+        request.method == "GET"
+        and request.url.path.startswith("/api/jobs/")
+        and request.url.path.endswith("/video")
+    )
+
     if (
         request.method == "OPTIONS"
         or request.url.path in PUBLIC_API_PATHS
+        or is_video_download
     ):
         return await call_next(request)
 

@@ -81,7 +81,7 @@ export default function Privacy() {
 
       <p>
         <a href="mailto:YOUR_EMAIL_ADDRESS">
-          YOUR_EMAIL_ADDRESS
+          redditracontour@gmail.com
         </a>
       </p>
     </section>

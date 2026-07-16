@@ -52,8 +52,7 @@ export default function Terms() {
       </h2>
 
       <p>
-        Add your contact email address here before submitting the app
-        for review.
+        redditracontour@gmail.com
       </p>
     </section>
   );
