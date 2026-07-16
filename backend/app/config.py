@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     frontend_origin: str = "http://localhost:5173"
     local_frontend_url: str = "http://localhost:5173"
     public_frontend_url: str = "https://reddit-studio.vercel.app"
+    local_app_api_key: str = ""
 
     openai_api_key: str = ""
     openai_model: str = "gpt-5-mini"
@@ -60,12 +61,22 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> list[str]:
+        # Only the private local frontend may call FastAPI.
+        # The public Vercel site contains legal/callback pages only.
         origins = {
             self.frontend_origin.rstrip("/"),
             self.local_frontend_url.rstrip("/"),
-            self.public_frontend_url.rstrip("/"),
         }
         return sorted(origin for origin in origins if origin)
+
+    def validate_local_security(self) -> None:
+        if not self.local_app_api_key:
+            raise RuntimeError(
+                "LOCAL_APP_API_KEY is missing. Generate one with "
+                "`python -c \"import secrets; "
+                "print(secrets.token_urlsafe(48))\"` and add it to "
+                "backend/.env and frontend/.env.local."
+            )
 
     def voice_id_for_key(self, voice_key: str) -> str:
         voice_ids = {

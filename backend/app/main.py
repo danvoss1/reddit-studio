@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import secrets
 import shutil
 from pathlib import Path
 from urllib.parse import urlencode
@@ -11,10 +12,11 @@ from fastapi import (
     File,
     HTTPException,
     Query,
+    Request,
     UploadFile,
 )
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -68,6 +70,60 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+
+# These routes must stay reachable without the private dashboard API key.
+# TikTok's OAuth callback is protected by the one-time OAuth state value.
+PUBLIC_API_PATHS = {
+    "/api/health",
+    "/api/tiktok/callback",
+    "/docs",
+    "/openapi.json",
+    "/redoc",
+}
+
+
+@app.middleware("http")
+async def require_local_app_key(
+    request: Request,
+    call_next,
+):
+    if (
+        request.method == "OPTIONS"
+        or request.url.path in PUBLIC_API_PATHS
+    ):
+        return await call_next(request)
+
+    configured_key = settings.local_app_api_key
+
+    if not configured_key:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "detail": (
+                    "LOCAL_APP_API_KEY is not configured on the backend."
+                )
+            },
+        )
+
+    supplied_key = request.headers.get(
+        "X-Reddit-Studio-Key",
+        "",
+    )
+
+    if not secrets.compare_digest(
+        supplied_key,
+        configured_key,
+    ):
+        return JSONResponse(
+            status_code=401,
+            content={
+                "detail": "Invalid or missing local application key."
+            },
+        )
+
+    return await call_next(request)
 
 
 def _http_error(exc: Exception) -> HTTPException:

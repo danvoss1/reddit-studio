@@ -11,13 +11,35 @@ import type {
 } from "./types";
 
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "")
+  ?? "";
+
+const LOCAL_APP_API_KEY =
+  import.meta.env.VITE_LOCAL_APP_API_KEY
+  ?? "";
+
+
 async function request<T>(
   url: string,
-  options?: RequestInit,
+  options: RequestInit = {},
 ): Promise<T> {
+  const headers =
+    new Headers(options.headers);
+
+  if (LOCAL_APP_API_KEY) {
+    headers.set(
+      "X-Reddit-Studio-Key",
+      LOCAL_APP_API_KEY,
+    );
+  }
+
   const response = await fetch(
-    url,
-    options,
+    `${API_BASE_URL}${url}`,
+    {
+      ...options,
+      headers,
+    },
   );
 
   if (!response.ok) {

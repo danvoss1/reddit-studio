@@ -6,3 +6,10 @@ frontend/dist/
 __pycache__/
 *.pyc
 .DS_Store
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env.local
+backend/data/
+*.sqlite3

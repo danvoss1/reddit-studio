@@ -5,7 +5,8 @@ import {
 
 
 const LOCAL_BACKEND_CALLBACK =
-  "http://127.0.0.1:8000/api/tiktok/callback";
+  import.meta.env.VITE_LOCAL_TIKTOK_CALLBACK
+  ?? "http://127.0.0.1:8000/api/tiktok/callback";
 
 
 export default function TikTokCallback() {
