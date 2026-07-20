@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 
 import {
+  CalendarClock,
   Clapperboard,
   FileClock,
   Gauge,
@@ -15,15 +16,23 @@ import {
 } from "lucide-react";
 
 import Assets from "./pages/Assets";
+import Contact from "./pages/Contact";
 import Dashboard from "./pages/Dashboard";
+import FAQ from "./pages/FAQ";
+import Features from "./pages/Features";
 import History from "./pages/History";
+import HowItWorks from "./pages/HowItWorks";
 import JobDetail from "./pages/JobDetail";
 import NewVideo from "./pages/NewVideo";
 import Privacy from "./pages/Privacy";
 import PublicLanding from "./pages/PublicLanding";
+import PublicLayout from "./pages/PublicLayout";
 import Terms from "./pages/Terms";
 import TikTokCallback from "./pages/TikTokCallback";
+import TikTokIntegration from "./pages/TikTokIntegration";
 import TikTokSettings from "./pages/TikTokSettings";
+
+import "./public-site.css";
 
 
 const navigation = [
@@ -52,16 +61,46 @@ const navigation = [
     "TikTok",
     Video,
   ],
+  [
+    "/schedule",
+    "Schedule",
+    CalendarClock,
+  ],
 ] as const;
 
 
 function PublicApp() {
   return (
-    <main className="public-site">
-      <Routes>
+    <Routes>
+      <Route element={<PublicLayout />}>
         <Route
           path="/"
           element={<PublicLanding />}
+        />
+
+        <Route
+          path="/features"
+          element={<Features />}
+        />
+
+        <Route
+          path="/how-it-works"
+          element={<HowItWorks />}
+        />
+
+        <Route
+          path="/tiktok-integration"
+          element={<TikTokIntegration />}
+        />
+
+        <Route
+          path="/faq"
+          element={<FAQ />}
+        />
+
+        <Route
+          path="/contact"
+          element={<Contact />}
         />
 
         <Route
@@ -73,18 +112,23 @@ function PublicApp() {
           path="/terms"
           element={<Terms />}
         />
+      </Route>
 
-        <Route
-          path="/auth/tiktok/callback"
-          element={<TikTokCallback />}
-        />
+      <Route
+        path="/auth/tiktok/callback"
+        element={<TikTokCallback />}
+      />
 
-        <Route
-          path="*"
-          element={<Navigate to="/" replace />}
-        />
-      </Routes>
-    </main>
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to="/"
+            replace
+          />
+        }
+      />
+    </Routes>
   );
 }
 
@@ -95,6 +139,7 @@ function PrivateApp() {
       <aside className="sidebar">
         <div className="brand">
           <Clapperboard size={25} />
+
           Reddit Studio
         </div>
 
@@ -111,6 +156,7 @@ function PrivateApp() {
                 end={to === "/"}
               >
                 <Icon size={18} />
+
                 {label}
               </NavLink>
             ),
@@ -118,7 +164,7 @@ function PrivateApp() {
         </nav>
 
         <div className="sidebar-note">
-          Local creator workspace
+          Creator workspace
         </div>
       </aside>
 
@@ -171,7 +217,12 @@ function PrivateApp() {
 
           <Route
             path="*"
-            element={<Navigate to="/" replace />}
+            element={
+              <Navigate
+                to="/"
+                replace
+              />
+            }
           />
         </Routes>
       </main>
